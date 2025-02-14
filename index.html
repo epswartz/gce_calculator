@@ -160,11 +160,11 @@
         <br><br>
         <p>
             Under New York State's <strong>Good Cause Eviction</strong> law, landlords in NYC and other opted-in
-            municipalities cannot evict tenants for not
-            paying rent if the nonpayment is due to an "unreasonable rent increase". The threshold for an
+            municipalities cannot evict covered tenants for not
+            paying rent if the nonpayment is due to an "unreasonable rent increase." The threshold for an
             unreasonable increase is based on the inflation for the previous calendar year at the time of the
             increase. New York Department of Housing and Community Renewal ("DHCR") publishes an annual notice
-            with the inflation rate that is used to calculate the maximum increase - the most recent notice can be
+            with the inflation rate that is used to calculate the maximum increase — the most recent notice can be
             found <a href="https://hcr.ny.gov/system/files/documents/2024/08/gce-fact-sheet-240819.pdf"
                 target="_blank">here</a>.
         </p>
@@ -185,7 +185,7 @@
             } else {
                 let increase_amount = Number(rent) * allowed_increase;
                 let maximum_rent = Number(rent) + increase_amount;
-                resultText.innerHTML = `Your rent can increase by <span class="output-number">$${increase_amount.toFixed(2)}</span>, making the new total <span class="output-number">$${maximum_rent.toFixed(2)}</span>.`;
+                resultText.innerHTML = `If you are covered, your rent can increase by up to <span class="output-number">$${increase_amount.toFixed(2)}</span>, making the new total <span class="output-number">$${maximum_rent.toFixed(2)}</span>.`;
             }
         }
     </script>
