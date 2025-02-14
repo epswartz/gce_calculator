@@ -49,9 +49,10 @@
             margin-bottom: 15px;
         }
 
-        .input-container input {
+        .input-container input,
+        .input-container select {
             width: 100%;
-            padding: 12px 12px 12px 30px;
+            padding: 5px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
@@ -69,10 +70,10 @@
             -moz-appearance: textfield;
         }
 
-        .input-container::before {
+        .rent-input-container::before {
             content: "$";
             position: absolute;
-            left: 10px;
+            left: -10px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 16px;
@@ -125,7 +126,6 @@
             text-decoration: underline;
         }
 
-        /* Disclaimer */
         .disclaimer {
             margin-top: 20px;
             font-size: 12px;
@@ -142,11 +142,18 @@
         <h1>Good Cause Eviction Maximum Rent Calculator</h1>
 
         <label for="rent">Current Monthly Rent:</label>
-        <div class="input-container">
+        <div class="input-container rent-input-container">
             <input type="number" id="rent" placeholder="Enter your rent">
         </div>
 
-        <label for="percentage">Allowed Increase: 8.82% (last updated 2/13/2025)</label>
+        <label for="county">Select Your County:</label>
+        <div class="input-container">
+            <select id="county">
+                <!-- Options are added dynamically from the county inflation rates map. -->
+            </select>
+        </div>
+
+        <p id="percentageDisplay">Allowed Increase: 8.82%</p>
 
         <button onclick="calculateIncrease()">Calculate</button>
 
@@ -160,33 +167,143 @@
         <br><br>
         <p>
             Under New York State's <strong>Good Cause Eviction</strong> law, landlords in NYC and other opted-in
-            municipalities cannot evict tenants for not
-            paying rent if the nonpayment is due to an "unreasonable rent increase". The threshold for an
-            unreasonable increase is based on the inflation for the previous calendar year at the time of the
-            increase. New York Department of Housing and Community Renewal ("DHCR") publishes an annual notice
-            with the inflation rate that is used to calculate the maximum increase - the most recent notice can be
+            municipalities cannot evict covered tenants for not paying rent if the nonpayment is due to an "unreasonable
+            rent increase."
+        </p>
+        <p>
+            The threshold for an unreasonable increase is based on the inflation for the previous
+            calendar year at the
+            time of the increase. New York Department of Housing and Community Renewal ("DHCR") publishes an annual
+            notice
+            with the inflation rate that is used to calculate the maximum increase — the most recent notice can be
             found <a href="https://hcr.ny.gov/system/files/documents/2024/08/gce-fact-sheet-240819.pdf"
                 target="_blank">here</a>.
         </p>
     </div>
 
     <p class="disclaimer">
-        Created by Ethan Swartzentruber, who is not a legal professional. Not intended as legal or financial advice.
+        Last Updated Feb 13 2025. Created by Ethan Swartzentruber, who is not a legal professional. Not intended as
+        legal or financial advice.
     </p>
 
     <script>
+        // Copied from the last page of https://hcr.ny.gov/system/files/documents/2024/08/gce-fact-sheet-240819.pdf
+        const countyInflationRates = {
+            // NY-NJ-PA Region
+            "Bronx": 0.0382,
+            "Dutchess": 0.0382,
+            "Kings": 0.0382,
+            "Nassau": 0.0382,
+            "New York (Manhattan)": 0.0382,
+            "Orange": 0.0382,
+            "Putnam": 0.0382,
+            "Queens": 0.0382,
+            "Richmond": 0.0382,
+            "Rockland": 0.0382,
+            "Suffolk": 0.0382,
+            "Westchester": 0.0382,
+
+            // Northeast Region
+            "Albany": 0.0345,
+            "Allegany": 0.0345,
+            "Broome": 0.0345,
+            "Cattaraugus": 0.0345,
+            "Cayuga": 0.0345,
+            "Chautauqua": 0.0345,
+            "Chemung": 0.0345,
+            "Chenango": 0.0345,
+            "Clinton": 0.0345,
+            "Columbia": 0.0345,
+            "Cortland": 0.0345,
+            "Delaware": 0.0345,
+            "Erie": 0.0345,
+            "Essex": 0.0345,
+            "Franklin": 0.0345,
+            "Fulton": 0.0345,
+            "Genesee": 0.0345,
+            "Greene": 0.0345,
+            "Hamilton": 0.0345,
+            "Herkimer": 0.0345,
+            "Jefferson": 0.0345,
+            "Lewis": 0.0345,
+            "Livingston": 0.0345,
+            "Madison": 0.0345,
+            "Monroe": 0.0345,
+            "Montgomery": 0.0345,
+            "Niagara": 0.0345,
+            "Oneida": 0.0345,
+            "Onondaga": 0.0345,
+            "Ontario": 0.0345,
+            "Orleans": 0.0345,
+            "Oswego": 0.0345,
+            "Otsego": 0.0345,
+            "Rensselaer": 0.0345,
+            "St. Lawrence": 0.0345,
+            "Saratoga": 0.0345,
+            "Schenectady": 0.0345,
+            "Schoharie": 0.0345,
+            "Schuyler": 0.0345,
+            "Seneca": 0.0345,
+            "Steuben": 0.0345,
+            "Sullivan": 0.0345,
+            "Tioga": 0.0345,
+            "Tompkins": 0.0345,
+            "Ulster": 0.0345,
+            "Warren": 0.0345,
+            "Washington": 0.0345,
+            "Wayne": 0.0345,
+            "Wyoming": 0.0345,
+            "Yates": 0.0345
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const countySelect = document.getElementById("county");
+
+            // Get all county names, sort them alphabetically
+            const sortedCounties = Object.keys(countyInflationRates).sort();
+
+            // Loop through sorted counties and add options to the dropdown
+            sortedCounties.forEach(county => {
+                const option = document.createElement("option");
+                option.value = county;
+                option.textContent = county;
+                countySelect.appendChild(option);
+            });
+
+            countySelect.value = "New York (Manhattan)"
+        });
+
+
+        document.getElementById('county').addEventListener('change', onCountyChange)
+
+        function onCountyChange() {
+            const county = this.value;
+            const percentageDisplay = document.getElementById('percentageDisplay');
+
+            if (countyInflationRates[county] !== undefined) {
+                let allowed_increase = (Math.min(.1, .05 + countyInflationRates[county]) * 100).toFixed(2);
+                percentageDisplay.innerText = `Allowed Increase: ${allowed_increase}%`;
+            } else {
+                percentageDisplay.innerText = "Allowed Increase: -";
+            }
+        }
+
         function calculateIncrease() {
             let rent = document.getElementById('rent').value;
-            let allowed_increase = 0.0882;
+            let county = document.getElementById('county').value;
             let resultText = document.getElementById('resultText');
 
-            if (rent.trim() === '' || isNaN(rent)) {
-                resultText.innerText = "Please enter valid numbers.";
-            } else {
-                let increase_amount = Number(rent) * allowed_increase;
-                let maximum_rent = Number(rent) + increase_amount;
-                resultText.innerHTML = `Your rent can increase by <span class="output-number">$${increase_amount.toFixed(2)}</span>, making the new total <span class="output-number">$${maximum_rent.toFixed(2)}</span>.`;
+            if (rent.trim() === '' || isNaN(rent) || county === '') {
+                resultText.innerText = "Please enter a valid rent amount and select a county.";
+                return;
             }
+
+            let allowed_increase = Math.min(.1, .05 + countyInflationRates[county]);
+
+            let increase_amount = Number(rent) * allowed_increase;
+            let maximum_rent = Number(rent) + increase_amount;
+
+            resultText.innerHTML = `Your rent can increase by <span class="output-number">$${increase_amount.toFixed(2)}</span>, making the new total <span class="output-number">$${maximum_rent.toFixed(2)}</span>.`;
         }
     </script>
 
