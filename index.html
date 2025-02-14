@@ -146,7 +146,7 @@
             <input type="number" id="rent" placeholder="Enter your rent">
         </div>
 
-        <label for="county">Select County (shows opted-in municipalities only):</label>
+        <label for="county">Select Municipality (shows only opted-in municipalities):</label>
         <div class="input-container">
             <select id="county">
                 <!-- Options are added dynamically from the county inflation rates map. -->
@@ -191,17 +191,13 @@
         // Copied from the last page of https://hcr.ny.gov/system/files/documents/2024/08/gce-fact-sheet-240819.pdf
         const countyInflationRates = {
             // NY-NJ-PA Region
-            "Bronx": 0.0382,
-            "Dutchess": 0.0382,
-            "Kings": 0.0382,
-            "New York (Manhattan)": 0.0382,
-            "Queens": 0.0382,
-            "Richmond": 0.0382,
+            "Poughkeepsie": 0.0382,
+            "New York City": 0.0382,
 
             // Northeast Region
             "Albany": 0.0345,
-            "Tompkins": 0.0345,
-            "Ulster": 0.0345,
+            "Ithaca": 0.0345,
+            "Kingston": 0.0345,
         };
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -218,7 +214,7 @@
                 countySelect.appendChild(option);
             });
 
-            countySelect.value = "New York (Manhattan)"
+            countySelect.value = "New York City"
         });
 
 
