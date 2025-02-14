@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCE Max Rent Calculator</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+        }
+
+        .input-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 12px 12px 12px 30px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .input-container input::-webkit-outer-spin-button,
+        .input-container input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .input-container input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .input-container::before {
+            content: "$";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #555;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .output-number {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .info {
+            margin-top: 20px;
+            max-width: 500px;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        .info a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .info a:hover {
+            text-decoration: underline;
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            max-width: 400px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Good Cause Eviction Maximum Rent Calculator</h1>
+
+        <label for="rent">Current Monthly Rent:</label>
+        <div class="input-container">
+            <input type="number" id="rent" placeholder="Enter your rent">
+        </div>
+
+        <label for="percentage">Allowed Increase: 8.82% (last updated 2/13/2025)</label>
+
+        <button onclick="calculateIncrease()">Calculate</button>
+
+        <p class="result" id="resultText"></p>
+    </div>
+
+    <div class="info">
+        <a href="https://www.nyc.gov/site/hpd/services-and-information/good-cause-eviction.page" target="_blank">
+            Click here to learn more about the GCE Law and whether it applies to you.
+        </a>
+        <br><br>
+        <p>
+            Under New York State's <strong>Good Cause Eviction</strong> law, landlords in NYC and other opted-in
+            municipalities cannot evict tenants for not
+            paying rent if the nonpayment is due to an "unreasonable rent increase". The threshold for an
+            unreasonable increase is based on the inflation for the previous calendar year at the time of the
+            increase. New York Department of Housing and Community Renewal ("DHCR") publishes an annual notice
+            with the inflation rate that is used to calculate the maximum increase - the most recent notice can be
+            found <a href="https://hcr.ny.gov/system/files/documents/2024/08/gce-fact-sheet-240819.pdf"
+                target="_blank">here</a>.
+        </p>
+    </div>
+
+    <p class="disclaimer">
+        Created by Ethan Swartzentruber, who is not a legal professional. Not intended as legal or financial advice.
+    </p>
+
+    <script>
+        function calculateIncrease() {
+            let rent = document.getElementById('rent').value;
+            let allowed_increase = 0.0882;
+            let resultText = document.getElementById('resultText');
+
+            if (rent.trim() === '' || isNaN(rent)) {
+                resultText.innerText = "Please enter valid numbers.";
+            } else {
+                let increase_amount = Number(rent) * allowed_increase;
+                let maximum_rent = Number(rent) + increase_amount;
+                resultText.innerHTML = `Your rent can increase by <span class="output-number">$${increase_amount.toFixed(2)}</span>, making the new total <span class="output-number">$${maximum_rent.toFixed(2)}</span>.`;
+            }
+        }
+    </script>
+
+</body>
+
+</html>
