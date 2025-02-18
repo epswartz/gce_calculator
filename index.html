@@ -322,7 +322,7 @@
             if (rent <= rentThreshold) {
                 resultText.innerHTML = `Your rent can increase by <span class="output-number">$${increase_amount.toFixed(2)}</span>, making the new total <span class="output-number">$${maximum_rent.toFixed(2)}</span>.`;
             } else {
-                resultText.innerHTML = `The GCE law does not apply to your current situation, because your current rent is above the threshold of <span class="output-red">$${rentThreshold.toFixed(0)}</span> for ${unitSize === 'Efficiency' ? 'an' : 'a'} ${unitSize} apartment in ${county}`;
+                resultText.innerHTML = `The GCE law does not apply to your current situation, because your current rent is above the threshold of <span class="output-red">$${rentThreshold.toFixed(0)}</span> for ${unitSize === 'Efficiency' ? 'an' : 'a'} ${unitSize.toLowerCase()} apartment in ${county}.`;
             }
         }
     </script>
