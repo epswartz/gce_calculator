@@ -108,6 +108,11 @@
             color: #007bff;
         }
 
+        .output-red {
+            font-weight: bold;
+            color: #FF0000;
+        }
+
         .info {
             margin-top: 20px;
             max-width: 500px;
@@ -146,10 +151,24 @@
             <input type="number" id="rent" placeholder="Enter your rent">
         </div>
 
-        <label for="county">Select Municipality (shows only opted-in municipalities):</label>
+
+
+        <label for="county">Select County (shows opted-in municipalities only):</label>
         <div class="input-container">
             <select id="county">
                 <!-- Options are added dynamically from the county inflation rates map. -->
+            </select>
+        </div>
+
+
+        <label for="county">Unit Size:</label>
+        <div class="input-container">
+            <select id="size">
+                <option value="Efficiency">Efficiency (Studio)</option>
+                <option value="1 Bedroom">1 Bedroom</option>
+                <option value="2 Bedroom">2 Bedroom</option>
+                <option value="3 Bedroom">3 Bedroom</option>
+                <option value="4 Bedroom">4 Bedroom</option>
             </select>
         </div>
 
@@ -191,14 +210,59 @@
         // Copied from the last page of https://hcr.ny.gov/system/files/documents/2024/08/gce-fact-sheet-240819.pdf
         const countyInflationRates = {
             // NY-NJ-PA Region
-            "Poughkeepsie": 0.0382,
-            "New York City": 0.0382,
+            "Bronx": 0.0382,
+            "Dutchess (City of Poughkeepsie)": 0.0382,
+            "Kings": 0.0382,
+            "New York (Manhattan)": 0.0382,
+            "Queens": 0.0382,
+            "Richmond": 0.0382,
 
             // Northeast Region
-            "Albany": 0.0345,
-            "Ithaca": 0.0345,
-            "Kingston": 0.0345,
+            "Albany (City of Albany)": 0.0345,
+            "Tompkins (City of Ithaca)": 0.0345,
+            "Ulster (City of Kingston)": 0.0345,
         };
+
+        // These are the 100% FMRs, not the actual cutoffs.
+        const rent_fmrs = {
+            // NY-NJ-PA Region
+            "Bronx": { "Efficiency": 2386, "1 Bedroom": 2451, "2 Bedroom": 2752, "3 Bedroom": 3434, "4 Bedroom": 3700 },
+            "Dutchess (City of Poughkeepsie)": { "Efficiency": 1237, "1 Bedroom": 1419, "2 Bedroom": 1825, "3 Bedroom": 2315, "4 Bedroom": 2560 },
+            "Kings": { "Efficiency": 2386, "1 Bedroom": 2451, "2 Bedroom": 2752, "3 Bedroom": 3434, "4 Bedroom": 3700 },
+            "New York (Manhattan)": { "Efficiency": 2386, "1 Bedroom": 2451, "2 Bedroom": 2752, "3 Bedroom": 3434, "4 Bedroom": 3700 },
+            "Queens": { "Efficiency": 2386, "1 Bedroom": 2451, "2 Bedroom": 2752, "3 Bedroom": 3434, "4 Bedroom": 3700 },
+            "Richmond": { "Efficiency": 2386, "1 Bedroom": 2451, "2 Bedroom": 2752, "3 Bedroom": 3434, "4 Bedroom": 3700 },
+
+            // Northest Region
+            "Albany (City of Albany)": { "Efficiency": 1011, "1 Bedroom": 1131, "2 Bedroom": 1374, "3 Bedroom": 1661, "4 Bedroom": 1830 },
+            "Tompkins (City of Ithaca)": { "Efficiency": 1311, "1 Bedroom": 1434, "2 Bedroom": 1664, "3 Bedroom": 2056, "4 Bedroom": 2229 },
+            "Ulster (City of Kingston)": { "Efficiency": 1284, "1 Bedroom": 1308, "2 Bedroom": 1702, "3 Bedroom": 2198, "4 Bedroom": 2459 }
+        };
+
+        const fmr_multipliers = {
+            // NY-NJ-PA Region
+            "Bronx": 2.45,
+            "Dutchess (City of Poughkeepsie)": 3.45,
+            "Kings": 2.45,
+            "New York (Manhattan)": 2.45,
+            "Queens": 2.45,
+            "Richmond": 2.45,
+
+            // Northeast Region
+            "Albany (City of Albany)": 3.45,
+            "Tompkins (City of Ithaca)": 3.45,
+            "Ulster (City of Kingston)": 3.00,
+        }
+
+        // TODO Check that the keys match in all three of these maps
+        if (Object.keys(countyInflationRates).length !== Object.keys(rent_fmrs).length || Object.keys(countyInflationRates).length !== Object.keys(fmr_multipliers).length) {
+            throw new Error("County information dictionaries must have equivalent keys. Dictionaries are not the same length.")
+        }
+        for (const county in countyInflationRates) {
+            if (!(county in rent_fmrs) || !(county in fmr_multipliers)) {
+                throw new Error("County information dictionaries must have equivalent keys. Key did not match:" + county)
+            }
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
             const countySelect = document.getElementById("county");
@@ -214,7 +278,7 @@
                 countySelect.appendChild(option);
             });
 
-            countySelect.value = "New York City"
+            countySelect.value = "New York (Manhattan)"
         });
 
 
@@ -233,21 +297,31 @@
         }
 
         function calculateIncrease() {
+
+
+
             let rent = document.getElementById('rent').value;
             let county = document.getElementById('county').value;
             let resultText = document.getElementById('resultText');
 
             if (rent.trim() === '' || isNaN(rent) || county === '') {
-                resultText.innerText = "Please enter a valid rent amount and select a county.";
+                resultText.innerHTML = `<span class="output-red">Please enter a valid rent amount, and select your county and unit size.</span>`;
                 return;
             }
+            // If rent is above the threshold for the selected apartment size, the GCE law does not apply.
+            let unitSize = document.getElementById('size').value
+            let rentThreshold = rent_fmrs[county][unitSize] * fmr_multipliers[county]
 
             let allowed_increase = Math.min(.1, .05 + countyInflationRates[county]);
 
             let increase_amount = Number(rent) * allowed_increase;
             let maximum_rent = Number(rent) + increase_amount;
 
-            resultText.innerHTML = `Your rent can increase by <span class="output-number">$${increase_amount.toFixed(2)}</span>, making the new total <span class="output-number">$${maximum_rent.toFixed(2)}</span>.`;
+            if (rent <= rentThreshold) {
+                resultText.innerHTML = `Your rent can increase by <span class="output-number">$${increase_amount.toFixed(2)}</span>, making the new total <span class="output-number">$${maximum_rent.toFixed(2)}</span>.`;
+            } else {
+                resultText.innerHTML = `The GCE law does not apply to your current situation, because your current rent is above the threshold of <span class="output-red">$${rentThreshold.toFixed(0)}</span> for ${unitSize === 'Efficiency' ? 'an' : 'a'} ${unitSize} apartment in ${county}`;
+            }
         }
     </script>
 
